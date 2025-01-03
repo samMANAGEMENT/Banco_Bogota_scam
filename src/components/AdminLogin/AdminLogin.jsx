@@ -13,7 +13,7 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            const response = await axios.post('https://46.202.140.21:8000/api/v1/login', {
+            const response = await axios.post('http://127.0.0.1:8000/api/v1/login', {
                 email,
                 password,
             });
