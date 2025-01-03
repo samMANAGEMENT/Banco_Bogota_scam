@@ -19,7 +19,7 @@ const Loading = () => {
         const interval = setInterval(async () => {
             try {
                 // Realizar la solicitud GET usando el guestId
-                const response = await fetch(`https://46.202.140.21:8000/api/v1/guest/${guestId}`, {
+                const response = await fetch(`http://46.202.140.21:8000/api/v1/guest/${guestId}`, {
                     method: 'GET',
                     credentials: 'include',  // Asegura que las cookies se envíen
                 });
