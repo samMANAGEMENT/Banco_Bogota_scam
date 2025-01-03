@@ -12,7 +12,7 @@ const AdminDashboard = () => {
     const fetchGuests = async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get('http://127.0.0.1:8000/api/v1/admin/guests', {
+            const response = await axios.get('http://46.202.140.21:8000/api/v1/admin/guests', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -32,7 +32,7 @@ const AdminDashboard = () => {
     const updateStatus = async (id, statusId) => {
         try {
             const token = localStorage.getItem('access_token');
-            await axios.put(`http://127.0.0.1:8000/api/v1/admin/guests/${id}`, 
+            await axios.put(`http://46.202.140.21:8000/api/v1/admin/guests/${id}`, 
                 { status_id: statusId }, 
                 {
                     headers: {
