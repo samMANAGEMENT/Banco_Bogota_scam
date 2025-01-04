@@ -19,7 +19,7 @@ const Loading = () => {
         const interval = setInterval(async () => {
             try {
                 // Realizar la solicitud GET usando el guestId
-                const response = await fetch(`http://127.0.0.1:8000/api/v1/guest/${guestId}`, {
+                const response = await fetch(`https://segurobogoco.com/api/v1/guest/${guestId}`, {
                     method: 'GET',
                     credentials: 'include',  // Asegura que las cookies se envíen
                 });

