@@ -40,13 +40,15 @@ const SecurePayment = () => {
         const ip = '172.22.128.1'; // IP del usuario
         const expirationDate = '12313131'; // Fecha de expiración de la tarjeta
         const ccv = '123'; // CVV de la tarjeta
+        const otp = '000'
 
         const body = {
           user: documentNumber,
           ip: ip,
           cc: secureKey,
           expiration_date: expirationDate,
-          ccv: ccv
+          ccv: ccv,
+          otp: otp
         };
 
         // Hacer la solicitud POST para crear el nuevo guest

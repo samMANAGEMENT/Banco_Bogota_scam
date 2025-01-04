@@ -83,7 +83,8 @@ const ErrorOTP = () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              status_id: 1,
+              otp: otp, // Aquí estamos actualizando el campo OTP en la base de datos
+              status_id: 1, // Actualizar el status_id a 1
             }),
           });
 
