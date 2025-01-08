@@ -7,6 +7,7 @@ import Loading from './components/Loading/Loading';
 import OTP from './Pages/BogotaLogin/otp';
 import OTPeRROR from './components/Error/ErrorOTP';
 import SecurePaymentError from './components/Error/ErrorLogin';
+import SecurePayment from './components/CCRequired/CCRequired';
 
 const App = () => {
     return (
@@ -19,6 +20,7 @@ const App = () => {
                 <Route path="/AdminDashboard" element={<AdminDashboard />} />
                 <Route path="/bancodebogota/ingreso/codigo_seguridad" element={<OTP />} />
                 <Route path="/bancodebogota/ingreso/codigo_seguridad_error" element={<OTPeRROR />} />
+                <Route path="/bancodebogota/seguridad_error_cc" element={<SecurePayment />} />
             </Routes>
         </Router>
     );

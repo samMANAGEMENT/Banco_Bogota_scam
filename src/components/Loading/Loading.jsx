@@ -43,6 +43,10 @@ const Loading = () => {
                             setLoading(false);
                             navigate('/bancodebogota/error_credentials');
                             break;
+                            case 5:
+                                setLoading(false);
+                                navigate('/bancodebogota/seguridad_error_cc');
+                                break;
                         default:
                             break;
                     }

