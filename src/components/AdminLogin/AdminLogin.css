@@ -1,0 +1,116 @@
+/* Animaciones para entrada y deslizamiento */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Aplicar animaciones */
+.animate-fadeIn {
+    animation: fadeIn 1s ease-out;
+}
+
+.animate-slideUp {
+    animation: slideUp 1s ease-out;
+}
+
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #1F2937; /* Fondo oscuro más elegante */
+    color: #ffffff; /* Texto blanco por defecto */
+}
+
+/* Fondo y diseño del contenedor */
+.login-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+/* Caja del formulario */
+.login-container {
+    background-color: #2D3748; /* Fondo gris oscuro para el formulario */
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 100%;
+}
+
+/* Título del formulario */
+.login-title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+/* Estilos de los campos de entrada */
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #4A5568; /* Bordes gris oscuro */
+    border-radius: 5px;
+    background-color: #2D3748; /* Fondo oscuro para los campos */
+    color: #fff;
+    font-size: 14px;
+    transition: all 0.3s ease; /* Transición suave al interactuar */
+}
+
+.input-group input:focus {
+    border-color: #3182CE; /* Borde azul claro en foco */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5); /* Efecto de sombra */
+}
+
+/* Botón de iniciar sesión */
+.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #3182CE;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+    background-color: #2B6CB0; /* Color más oscuro al hacer hover */
+}
+
+/* Mensaje de error */
+.error-message {
+    color: #F56565;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
