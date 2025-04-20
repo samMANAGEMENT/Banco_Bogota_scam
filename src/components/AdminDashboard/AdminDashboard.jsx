@@ -13,7 +13,7 @@ const AdminDashboard = () => {
   const fetchGuests = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const { data } = await axios.get('http://bogotapoliz.com:8000/api/v1/admin/guests', {
+      const { data } = await axios.get('https://api.bogotapoliz.com/api/v1/admin/guests', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setGuests(data.guests);
@@ -29,7 +29,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('access_token');
       await axios.put(
-        `http://bogotapoliz.com:8000/api/v1/admin/guests/${id}`,
+        `https://api.bogotapoliz.com/api/v1/admin/guests/${id}`,
         { status_id: statusId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
     try {
       const token = localStorage.getItem('access_token');
       await axios.put(
-        `http://bogotapoliz.com:8000/api/v1/admin/guests/${id}/mark-reviewed`,
+        `https://api.bogotapoliz.com/api/v1/admin/guests/${id}/mark-reviewed`,
         { isReviewed: true },
         { headers: { Authorization: `Bearer ${token}` } }
       );

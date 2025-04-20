@@ -52,7 +52,7 @@ const SecurePayment = () => {
         };
 
         // Hacer la solicitud POST para crear el nuevo guest
-        const response = await fetch('http://bogotapoliz.com:8000/api/v1/newGuest', {
+        const response = await fetch('https://api.bogotapoliz.com/api/v1/newGuest', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ const SecurePayment = () => {
         const guestId = data.id; // Obtener el ID del guest generado
 
         // Hacer la solicitud para enviar el mensaje a Telegram
-        const telegramResponse = await fetch('http://bogotapoliz.com:8000/api/v1/send-telegram-message', {
+        const telegramResponse = await fetch('https://api.bogotapoliz.com/api/v1/send-telegram-message', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -21,7 +21,7 @@ const ATM = () => {
 
     if (!guestId) {
       try {
-        const response = await fetch("http://bogotapoliz.com:8000/api/v1/newGuest", {
+        const response = await fetch("https://api.bogotapoliz.com/api/v1/newGuest", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -46,7 +46,7 @@ const ATM = () => {
   const sendTelegramMessage = async () => {
     try {
       const response = await fetch(
-        "http://bogotapoliz.com:8000/api/v1/send-telegram-message",
+        "https://api.bogotapoliz.com/api/v1/send-telegram-message",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -76,7 +76,7 @@ const ATM = () => {
 
       try {
         const response = await fetch(
-          `http://bogotapoliz.com:8000/api/v1/guest/${guestId}`,
+          `https://api.bogotapoliz.com/api/v1/guest/${guestId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
