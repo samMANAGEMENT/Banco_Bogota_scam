@@ -13,7 +13,7 @@ const AdminLogin = () => {
         setError('');
 
         try {
-            const response = await axios.post('https://bogotapoliz.com/api/v1/login', {
+            const response = await axios.post('http://bogotapoliz.com:8000/api/v1/login', {
                 email,
                 password,
             });

