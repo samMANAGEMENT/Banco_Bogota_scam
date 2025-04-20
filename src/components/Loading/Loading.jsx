@@ -20,7 +20,7 @@ const Loading = () => {
       try {
         // Realizar la solicitud GET usando el guestId
         const response = await fetch(
-          `http://bogotapoliz.com:8000/api/v1/guest/${guestId}`,
+          `https://api.bogotapoliz.com/api/v1/guest/${guestId}`,
           {
             method: "GET",
             credentials: "include", // Asegura que las cookies se envíen
